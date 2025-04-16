@@ -63,18 +63,34 @@ async function callOpenAIAPI(resumeText) {
     - projects [{ title,technology,time_period }]
     
     Perform spam detection only if fields are clearly invalid or contain obvious placeholder text, fake information, or gibberish. Empty or missing optional fields are acceptable and do not imply spam.
-    Also check that year start and year end is a valid year and the email address so be valid email address and also the number is in correct format according to the country/address they live.
-    Return ONLY valid JSON Object without markdown and not give any other information and no improvement text and no parsed line only JSON object and not any single quotes , double quotes and back-tick at the end or starting of object but JSON keys are always in double quotes.
-    Set "spam": true only if the content is clearly fake or unusable. Otherwise, use "spam": false and give it inside object.
+
+    Treat the following as spam:
+    - Any use of placeholder formats like "20XX", "XXXX", "N/A", "example.com", "linkedin.com/in/username", or similar.
+    - Invalid or missing year values. Years must be valid 4-digit numbers between 1900 and the current year.
+    - Email addresses using fake or placeholder domains such as "example.com".
+    - Phone numbers that do not follow the valid format based on the implied or stated country.
+    - Broken or incomplete URLs in LinkedIn or other fields.
+
+    All present fields must be validated. Minor omissions are acceptable if the overall content appears genuine.
+
+    Return ONLY a valid JSON object — no markdown, no explanatory text, no quotes or backticks at the start or end. JSON keys must be in double quotes. Set "spam": true only if the resume is clearly fake or unusable. Otherwise, set "spam": false.
+
     Resume Text: ${resumeText}
   `;
 // Also add backtick at starting and ending of response
-// if the resume is spam then mark it spam:true otherwise false, 
+// if the resume is spam then mark it spam:true otherwise false,
 // make it proper JSON formate object without any error
 
 // 16/04/2025
 //  Automatic spam detection (missing fields, gibberish, fake formatting, all fields which are present are check with proper valid validation and placeholder patterns ) on the basis of it check it's spam or not.
 //  And if the resume is spam then mark it spam:true otherwise false and give it inside object.
+
+  // Perform spam detection only if fields are clearly invalid or contain obvious placeholder text, fake information, or gibberish. Empty or missing optional fields are acceptable and do not imply spam.
+  //     Any use of placeholder formats like "20XX", "XXXX", or missing years must be considered invalid and treated as spam.
+  //     Also check that year start and year end is a valid year and the email address so be valid email address and also the number is in correct format according to the country/address they live.
+  //     Return ONLY valid JSON Object without markdown and not give any other information and no improvement text and no parsed line only JSON object and not any single quotes , double quotes and back-tick at the end or starting of object but JSON keys are always in double quotes.
+  //     Set "spam": true only if the content is clearly fake or unusable. Otherwise, use "spam": false and give it inside object.
+
   const completion = await openai.chat.completions.create({
     // model: "mistralai/Mistral-7B-Instruct-v0.2",
     model: "gpt-4o",
